@@ -11,27 +11,37 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @movies = Movie.all
+    
+    #ratings
     @all_ratings = Movie.all.distinct.pluck(:rating)
     if params[:ratings]
-      @ratings = params[:ratings].keys
+      session[:ratings] = params[:ratings]
     else
-      @ratings = @all_ratings
+      params[:ratings] = session[:ratings]
     end
-    @ratings.each do |rating|
+    @ratings = params[:ratings]
+
+    @ratings.keys.each do |rating|
       params[rating] = true
     end
-
-    @movies = Movie.order(@sort_by)
-    @sort_by = params[:sort_by]
-    if @sort_by
-      @movies = Movie.order(@sort_by)
-    end
     @current_ratings = params[:ratings] 
-    if !params[:ratings].nil?
-      @movies = Movie.where(rating: @current_ratings.keys);
+
+    #sort
+    if !params[:sort]
+      params[:sort] = session[:sort]
+    else
+      session[:sort] = params[:sort]
     end
     
-
+    #@movies
+    if params[:ratings].present? && params[:sort].present?
+      @movies = Movie.where(rating: @current_ratings.keys).order(params[:sort]);
+    elsif params[:ratings].present?
+      @movies = Movie.where(rating: @current_ratings.keys);
+    else
+      @movies = Movie.order(params[:sort])
+    end
   end
 
   def new
