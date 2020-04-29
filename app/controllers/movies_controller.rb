@@ -22,10 +22,11 @@ class MoviesController < ApplicationController
     end
     @ratings = params[:ratings]
 
-    @ratings.keys.each do |rating|
-      params[rating] = true
-    end
-    @current_ratings = params[:ratings] 
+    if @ratings 
+      @ratings.keys.each do |rating|
+        params[rating] = true
+      end
+    end 
 
     #sort
     if !params[:sort]
@@ -36,9 +37,9 @@ class MoviesController < ApplicationController
     
     #@movies
     if params[:ratings].present? && params[:sort].present?
-      @movies = Movie.where(rating: @current_ratings.keys).order(params[:sort]);
+      @movies = Movie.where(rating: params[:ratings].keys).order(params[:sort]);
     elsif params[:ratings].present?
-      @movies = Movie.where(rating: @current_ratings.keys);
+      @movies = Movie.where(rating: params[:ratings].keys);
     else
       @movies = Movie.order(params[:sort])
     end
